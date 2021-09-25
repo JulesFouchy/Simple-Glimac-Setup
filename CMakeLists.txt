@@ -39,6 +39,8 @@ function(setup_tp TP_NUMBER)
     # Set include directories
     include_directories(
         ${TP_NUMBER}
+        lib
+        lib/glimac
     )
 
     # OpenGL
