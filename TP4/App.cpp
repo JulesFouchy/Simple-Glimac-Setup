@@ -8,7 +8,7 @@ App::App(int window_width, int window_height)
 
 void App::render()
 {
-    glClearColor(1.f, 0.5f, 0.5f, 1.f);
+    glClearColor(0.f, 0.75f, 0.75f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
