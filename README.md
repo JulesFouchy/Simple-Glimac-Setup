@@ -10,6 +10,15 @@ To use CMake I recommend this VS Code extension : [ms-vscode.cmake-tools](https:
 
 Alternatively, you can just create a *build* folder at the root of this project, open a terminal and run `cmake ..` ; chances are it will detect what compiler you have installed and generate the appropriate Makefile / Visual Studio solution / Xcode project.
 
+## TPs
+
+I have already made 9 TP directories that are ready for you to code.
+If you ever need more, simply duplicate one of them and update CMakeLists.txt (at the bottom of the file you will see the registration of all the TP folders : 
+```cmake
+setup_tp(TP1)
+setup_tp(TP2)
+# ...
+```
 
 ## main.cpp
 
