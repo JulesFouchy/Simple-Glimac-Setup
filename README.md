@@ -1,10 +1,6 @@
-# Simple-OpenGL-Setup
+# Simple-Glimac-Setup
 
-Welcome to this barebone OpenGL project !
-
-It is meant for you to copy-paste and use as a starting point for your own projects.
-
-(NB : if you are not planning on learning how to make a computer graphics application from scratch, you should consider using a more fully-featured framework like [Cool](https://github.com/CoolLibs/Cool)).
+This is an alternative setup to follow [these tutorials](https://igm.univ-mlv.fr/~biri/Enseignement/IMAC2/opengl-TPs/opengl.php?section=teaching&teaching=opengl&teaching_section=tds). It has the advantage that **it is easy to use an all platforms** (Linux, Windows and Mac).
 
 ## Compiling
 
