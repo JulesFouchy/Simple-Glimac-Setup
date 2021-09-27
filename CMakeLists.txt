@@ -32,6 +32,7 @@ function(setup_tp TP_NUMBER)
     # Grab all the source files
     file(GLOB_RECURSE MY_SOURCES
         ${TP_NUMBER}/*
+        lib/glimac/*
     )
     # Create target executable
     add_executable(${TARGET_NAME}
