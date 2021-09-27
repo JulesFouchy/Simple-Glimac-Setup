@@ -23,6 +23,9 @@ option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
 add_subdirectory(${GLFW_DIR} binary_dir EXCLUDE_FROM_ALL)
 
+# Glad
+add_library(GLAD STATIC lib/glad/src/glad.c)
+
 # Build the different TPs
 function(setup_tp TP_NUMBER)
     set(TARGET_NAME ${TP_NUMBER})
@@ -47,9 +50,11 @@ function(setup_tp TP_NUMBER)
     find_package(OpenGL REQUIRED)
     include_directories(
         ${OPENGL_INCLUDE_DIR}
+        lib/glad/include
     )
     target_link_libraries(${TARGET_NAME}
         ${OPENGL_LIBRARIES}
+        GLAD
     )
 
     # GLFW
