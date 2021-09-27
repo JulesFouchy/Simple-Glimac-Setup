@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glm.hpp"
+#include <iostream>
 
 namespace glimac {
 
