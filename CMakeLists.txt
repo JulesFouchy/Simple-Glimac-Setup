@@ -71,6 +71,7 @@ function(setup_tp TP_NUMBER)
     )
     endfunction()
     copy_folder_to_the_output_folder("assets")
+    copy_folder_to_the_output_folder(${TP_NUMBER}/"shaders")
 endfunction(setup_tp)
 
 setup_tp(TP1)
