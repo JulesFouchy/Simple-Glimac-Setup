@@ -28,7 +28,7 @@ add_library(GLAD STATIC lib/glad/src/glad.c)
 
 # Build the different TPs
 function(setup_tp TP_NUMBER)
-    set(TARGET_NAME ${TP_NUMBER})
+    set(TARGET_NAME ${TP_NUMBER}_exe)
     # Grab all the source files
     file(GLOB_RECURSE MY_SOURCES
         ${TP_NUMBER}/*
