@@ -1,8 +1,30 @@
-#include "App.hpp"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
-static App& get_app(GLFWwindow* window)
+int window_width  = 1280;
+int window_height = 720;
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    return *reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+}
+
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+}
+
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+}
+
+static void size_callback(GLFWwindow* window, int width, int height)
+{
+    window_width  = width;
+    window_height = height;
 }
 
 int main()
@@ -12,7 +34,7 @@ int main()
         return -1;
     }
 
-    /* Create a windowed mode window and its OpenGL context */
+    /* Create a window and its OpenGL context */
 #ifdef __APPLE__
     /* We need to explicitly ask for a 3.3 context on Mac */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -20,7 +42,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Hello World", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "TP6", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -34,36 +56,20 @@ int main()
         return -1;
     }
 
-    /* Create the App */
-    int w, h;
-    glfwGetWindowSize(window, &w, &h);
-    App app{w, h};
-
-    /* Hook user inputs to the App */
-    glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&app));
-    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        get_app(window).key_callback(key, scancode, action, mods);
-    });
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-        get_app(window).mouse_button_callback(button, action, mods);
-    });
-    glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-        get_app(window).scroll_callback(xoffset, yoffset);
-    });
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-        get_app(window).cursor_position_callback(xpos, ypos);
-    });
-    glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
-        get_app(window).size_callback(width, height);
-    });
+    /* Hook input callbacks */
+    glfwSetKeyCallback(window, &key_callback);
+    glfwSetMouseButtonCallback(window, &mouse_button_callback);
+    glfwSetScrollCallback(window, &scroll_callback);
+    glfwSetCursorPosCallback(window, &cursor_position_callback);
+    glfwSetWindowSizeCallback(window, &size_callback);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
-        app.render();
+        glClearColor(0.75f, 0.75f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
         /* Poll for and process events */
         glfwPollEvents();
     }

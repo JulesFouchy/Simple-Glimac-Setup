@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-int window_width = 1280;
+int window_width  = 1280;
 int window_height = 720;
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -60,7 +60,7 @@ int main()
     glfwSetKeyCallback(window, &key_callback);
     glfwSetMouseButtonCallback(window, &mouse_button_callback);
     glfwSetScrollCallback(window, &scroll_callback);
-    glfwSetCursorPosCallback(window,&cursor_position_callback);
+    glfwSetCursorPosCallback(window, &cursor_position_callback);
     glfwSetWindowSizeCallback(window, &size_callback);
 
     /* Loop until the user closes the window */
