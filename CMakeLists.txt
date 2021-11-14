@@ -16,11 +16,11 @@ function(setup_tp TP_NUMBER)
     target_compile_features(${TARGET_NAME} PRIVATE cxx_std_11)
 
     # Enable many good warnings
-    # if (MSVC)
-    #     target_compile_options(${TARGET_NAME} PRIVATE /WX /W4)
-    # else()
-    #     target_compile_options(${TARGET_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic -pedantic-errors -Wconversion -Wsign-conversion)
-    # endif()
+    if (MSVC)
+        target_compile_options(${TARGET_NAME} PRIVATE /WX /W4)
+    else()
+        target_compile_options(${TARGET_NAME} PRIVATE -Werror -W -Wall -Wextra -Wpedantic -pedantic-errors -Wconversion -Wsign-conversion)
+    endif()
     
     # Add all the source and header files
     target_include_directories(${TARGET_NAME} PRIVATE ${TP_NUMBER})
