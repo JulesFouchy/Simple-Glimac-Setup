@@ -1,6 +1,6 @@
 # Simple-Glimac-Setup
 
-This is an alternative setup to follow [these tutorials](https://igm.univ-mlv.fr/~biri/Enseignement/IMAC2/opengl-TPs/opengl.php?section=teaching&teaching=opengl&teaching_section=tds). It has the advantage that **it is easy to use an all platforms** (Linux, Windows and Mac).
+This is an alternative setup to follow [these tutorials](https://igm.univ-mlv.fr/~biri/Enseignement/IMAC2/opengl-TPs/opengl.php?section=teaching&teaching=opengl&teaching_section=tds). It has the advantage that **it is easy to use an all platforms** (Linux, Windows and Mac). It also fixes an annoying thing with the original setup: with this one you don't need to re-run CMake when you modify your shaders. The changes will be detected and handled automatically.
 
 ## Compiling
 
@@ -19,14 +19,6 @@ setup_tp(TP1)
 setup_tp(TP2)
 # ...
 ```
-
-## main.cpp
-
-In here we initialize [*glfw*](https://www.glfw.org/docs/latest/) (the library that handles the window and user inputs), create a window and then start the app. You don't really need to modify this file, except to change your window name or initial size.
-
-## App
-
-This is the actual root of your project. This is where your drawing code should go, as well as handling inputs from the user.
 
 ## User inputs
 

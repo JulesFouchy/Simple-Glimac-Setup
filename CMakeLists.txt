@@ -1,83 +1,49 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
+cmake_policy(SET CMP0112 NEW) # Required by copy_folder_to_output()
 
-# Set project name
-project(SimpleGlimac C CXX)
-# Set C++ version
-set(CXX_STANDARD 11)
+project(SimpleGlimac)
 
-##
-# Boring setup
-##
+# Set the folder where the executables are created
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 
-# Set the folder where the executable is created
-set(EXECUTABLE_OUTPUT_PATH 
-    ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}
-)
+# Include glimac
+add_subdirectory(glimac)
 
-# Glfw
-set(GLFW_DIR lib/glfw)
-option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
-option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
-option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
-option(GLFW_INSTALL "Generate installation target" OFF)
-option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
-add_subdirectory(${GLFW_DIR} binary_dir EXCLUDE_FROM_ALL)
-
-# Glad
-add_library(GLAD STATIC lib/glad/src/glad.c)
-
-# Build the different TPs
+# Create a target for each TP
 function(setup_tp TP_NUMBER)
     set(TARGET_NAME ${TP_NUMBER}_exe)
-    # Grab all the source files
-    file(GLOB_RECURSE MY_SOURCES
-        ${TP_NUMBER}/*
-        lib/glimac/*
-    )
-    # Create target executable
-    add_executable(${TARGET_NAME}
-        ${MY_SOURCES}
-    )
-    set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD ${CXX_STANDARD})
+    add_executable(${TARGET_NAME})
+    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_11)
 
-    # Set include directories
-    include_directories(
-        ${TP_NUMBER}
-        lib
-        lib/glimac
-    )
+    # Enable many good warnings
+    # if (MSVC)
+    #     target_compile_options(${TARGET_NAME} PRIVATE /WX /W4)
+    # else()
+    #     target_compile_options(${TARGET_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic -pedantic-errors -Wconversion -Wsign-conversion)
+    # endif()
+    
+    # Add all the source and header files
+    target_include_directories(${TARGET_NAME} PRIVATE ${TP_NUMBER})
+    file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS ${TP_NUMBER}/*)
+    target_sources(${TARGET_NAME} PRIVATE ${MY_SOURCES})
 
-    # OpenGL
-    find_package(OpenGL REQUIRED)
-    include_directories(
-        ${OPENGL_INCLUDE_DIR}
-        lib/glad/include
-    )
-    target_link_libraries(${TARGET_NAME}
-        ${OPENGL_LIBRARIES}
-        GLAD
-    )
+    # Add glimac as a dependency
+    target_link_libraries(${TARGET_NAME} glimac)
 
-    # GLFW
-    include_directories(${GLFW_DIR}/include)
-    include_directories(${GLFW_DIR}/deps)
-    target_link_libraries(${TARGET_NAME}
-        glfw
-    )
-
-    ##
-    # Add a post build operation to copy shaders to the output folder (where the executable is created)
-    ##
-    function(copy_folder_to_the_output_folder _FOLDERPATH)
-    add_custom_command(
-        TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/${_FOLDERPATH}
-            $<TARGET_FILE_DIR:${TARGET_NAME}>/${_FOLDERPATH}
-    )
+    # Copy the assets and the shaders to the output folder (where the executable is created)
+    function(copy_folder_to_output DIR)
+        string(SHA1 TARGET_HASH ${DIR})                                  # Create a unique name for our custom target. We can't use ${DIR} directly because it could contain invalid characters like spaces
+        set(CUSTOM_TARGET_NAME CopyToOutput_${TP_NUMBER}_${TARGET_HASH}) #
+        add_custom_target(${CUSTOM_TARGET_NAME}
+            COMMENT "Copying \"${DIR}\""
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/${DIR}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>/${DIR}
+        )
+        add_dependencies(${TARGET_NAME} ${CUSTOM_TARGET_NAME}) # Mark our custom target as a dependency of our TP, so that whenever the TP is launched our custom target is triggered and files are copied
     endfunction()
-    copy_folder_to_the_output_folder("assets")
-    copy_folder_to_the_output_folder(${TP_NUMBER}/"shaders")
+    copy_folder_to_output(assets)
+    copy_folder_to_output(${TP_NUMBER}/shaders)
 endfunction(setup_tp)
 
 setup_tp(TP1)
