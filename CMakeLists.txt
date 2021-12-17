@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.8)
-cmake_policy(SET CMP0112 NEW) # Required by copy_folder_to_output()
 
 project(SimpleGlimac)
 
@@ -31,19 +30,9 @@ function(setup_tp TP_NUMBER)
     target_link_libraries(${TARGET_NAME} glimac)
 
     # Copy the assets and the shaders to the output folder (where the executable is created)
-    function(copy_folder_to_output DIR)
-        string(SHA1 TARGET_HASH ${DIR})                                  # Create a unique name for our custom target. We can't use ${DIR} directly because it could contain invalid characters like spaces
-        set(CUSTOM_TARGET_NAME CopyToOutput_${TP_NUMBER}_${TARGET_HASH}) #
-        add_custom_target(${CUSTOM_TARGET_NAME}
-            COMMENT "Copying \"${DIR}\""
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_SOURCE_DIR}/${DIR}
-                $<TARGET_FILE_DIR:${TARGET_NAME}>/${DIR}
-        )
-        add_dependencies(${TARGET_NAME} ${CUSTOM_TARGET_NAME}) # Mark our custom target as a dependency of our TP, so that whenever the TP is launched our custom target is triggered and files are copied
-    endfunction()
-    copy_folder_to_output(assets)
-    copy_folder_to_output(${TP_NUMBER}/shaders)
+    include("CMakeUtils/files_and_folders.cmake")
+    Cool__target_copy_folder(${TARGET_NAME} assets)
+    Cool__target_copy_folder(${TARGET_NAME} ${TP_NUMBER}/shaders)
 endfunction(setup_tp)
 
 setup_tp(TP1)
