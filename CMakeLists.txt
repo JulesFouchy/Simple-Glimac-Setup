@@ -12,7 +12,7 @@ add_subdirectory(glimac)
 function(setup_tp TP_NUMBER)
     set(TARGET_NAME ${TP_NUMBER}_exe)
     add_executable(${TARGET_NAME})
-    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_11)
+    target_compile_features(${TARGET_NAME} PRIVATE cxx_std_17)
 
     # Enable many good warnings
     if (MSVC)
