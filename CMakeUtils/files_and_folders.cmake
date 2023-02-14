@@ -1,44 +1,65 @@
-#! Copies FILE to the directory where the executable of your TARGET will be created (you can optionally specify a third argument to override that destination folder)
-#  FILE can be either an absolute or a relative path. If it is relative it will be relative to ${CMAKE_SOURCE_DIR}.
-#  Unlike the default CMake functions this one will re-copy the file whenever it changes
-function(Cool__target_copy_file TARGET FILE)
-    # Get OUT_DIR as an optional parameter
-    if (${ARGC} GREATER_EQUAL 3)
-        set(OUT_DIR ${ARGV2})
-    else()
-        set(OUT_DIR $<TARGET_FILE_DIR:${TARGET}>)
-    endif()
-    # Get the part of the file path relative to the top-level CMakeLists.txt
-    cmake_path(RELATIVE_PATH FILE BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE FILE_RELATIVE_PATH)
-    if (NOT FILE_RELATIVE_PATH)
-        set(FILE_RELATIVE_PATH ${FILE})
-    endif()
-    # Add the copy command
-    set(DUMMY_OUTPUT_NAME ${CMAKE_CURRENT_BINARY_DIR}/DUMMY_${FILE_RELATIVE_PATH}_${TARGET})
+# /!\ NB: you need at least CMake version 3.20 for these functions to work
+
+#! Copies INPUT_FILE to OUTPUT_FILE whenever the INPUT_FILE has changed
+#  Both INPUT_FILE and OUTPUT_FILE must be absolute paths
+function(Cool__target_copy_file_absolute_paths
+         TARGET
+         INPUT_FILE
+         OUTPUT_FILE
+)
+    string(MD5 DUMMY_OUTPUT_NAME "${INPUT_FILE}${TARGET}")
+    set(DUMMY_OUTPUT_NAME timestamp_${DUMMY_OUTPUT_NAME})
     add_custom_command(
-        COMMENT "Copying \"${FILE_RELATIVE_PATH}\""
+        COMMENT "Copying \"${INPUT_FILE}\" to \"${OUTPUT_FILE}\""
         OUTPUT ${DUMMY_OUTPUT_NAME}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${DUMMY_OUTPUT_NAME} # Create a dummy directory that CMake will use as a timestamp reference to know if the actual file has changed, when it checks for the OUTPUT (unfortunately OUTPUT can't use a generator expression so we can't use our actual output file as the OUTPUT)
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/${FILE_RELATIVE_PATH} ${OUT_DIR}/${FILE_RELATIVE_PATH} # Actual copy of the file to the destination
-        MAIN_DEPENDENCY ${FILE}
+        COMMAND ${CMAKE_COMMAND} -E touch "${DUMMY_OUTPUT_NAME}" # Create a dummy file that CMake will use as a timestamp reference to know if the actual file has changed, when it checks for the OUTPUT (unfortunately OUTPUT can't use a generator expression so we can't use our actual output file as the OUTPUT)
+        COMMAND ${CMAKE_COMMAND} -E copy "${INPUT_FILE}" "${OUTPUT_FILE}" # Actual copy of the file to the destination
+        MAIN_DEPENDENCY ${INPUT_FILE}
+        VERBATIM
     )
-    target_sources(${TARGET} PRIVATE ${FILE}) # Required for the custom command to be run when we build our target
+    target_sources(${TARGET} PRIVATE ${INPUT_FILE}) # Required for the custom command to be run when we build our target
 endfunction()
 
-#! Copies FOLDER and all its files to the directory where the executable of your TARGET will be created (you can optionally specify a third argument to override that destination folder)
-#  FOLDER can be either an absolute or a relative path. If it is relative it will be relative to ${CMAKE_SOURCE_DIR}.
-#  Unlike the default CMake functions this one will re-copy the files of the folder whenever they change or a file is added
-function(Cool__target_copy_folder TARGET FOLDER)
-    # Get OUT_DIR as an optional parameter
+function(Cool__target_copy_file
+         TARGET
+         FILE
+)
+    # Get OUT_FILE as an optional parameter
     if (${ARGC} GREATER_EQUAL 3)
-        set(OUT_DIR ${ARGV2})
+        set(OUT_FILE $<TARGET_FILE_DIR:${TARGET}>/${ARGV2})
     else()
-        set(OUT_DIR $<TARGET_FILE_DIR:${TARGET}>)
+        # Get the part of the file path relative to the top-level CMakeLists.txt
+        cmake_path(RELATIVE_PATH FILE BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE FILE_RELATIVE_PATH)
+        if (NOT FILE_RELATIVE_PATH)
+            set(FILE_RELATIVE_PATH ${FILE})
+        endif()
+        set(OUT_FILE $<TARGET_FILE_DIR:${TARGET}>/${FILE_RELATIVE_PATH})
     endif()
+    # Add the copy command
+    Cool__target_copy_file_absolute_paths(${TARGET}
+        ${CMAKE_SOURCE_DIR}/${FILE_RELATIVE_PATH}
+        ${OUT_FILE})
+endfunction()
+
+function(Cool__target_copy_folder 
+        TARGET
+        FOLDER)
+    # Get the part of the folder path relative to CMAKE_SOURCE_DIR (the top-level CMakeLists.txt)
+    cmake_path(RELATIVE_PATH FOLDER BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE FOLDER_RELATIVE_PATH)
+    if (NOT FOLDER_RELATIVE_PATH)
+        set(FOLDER_RELATIVE_PATH ${FOLDER})
+    endif()
+    # Get the absolute folder path
+    set(FOLDER_ABSOLUTE_PATH ${CMAKE_SOURCE_DIR}/${FOLDER_RELATIVE_PATH})
     # Copy each file
-    file(GLOB_RECURSE FILES CONFIGURE_DEPENDS ${FOLDER}/*)
+    file(GLOB_RECURSE FILES CONFIGURE_DEPENDS ${FOLDER_ABSOLUTE_PATH}/*)
     foreach(FILE ${FILES})
-        Cool__target_copy_file(${TARGET} ${FILE} ${OUT_DIR})
+        if (${ARGC} GREATER_EQUAL 3)
+            get_filename_component(FILE_NAME ${FILE} NAME)
+            Cool__target_copy_file(${TARGET} ${FILE} ${ARGV2}/${FILE_NAME})
+        else()
+            Cool__target_copy_file(${TARGET} ${FILE})
+        endif()
     endforeach()
 endfunction()
 
